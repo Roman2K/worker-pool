@@ -1,38 +1,6 @@
 require "thread"
 
 class WorkerPool
-  class SizedQueue
-    attr_reader :max
-    
-    def initialize(max)
-      @max    = max
-      @items  = Queue.new
-      @guard  = Mutex.new
-      @wait   = ConditionVariable.new
-    end
-    
-    def empty?
-      @items.empty?
-    end
-    
-    # TODO make thread-safe
-    def push(obj)
-      wait until @items.size < @max
-      @items.push(obj)
-    end
-    
-    # TODO make thread-safe
-    def shift
-      obj = @items.shift
-      @guard.synchronize { @wait.signal }
-      obj
-    end
-    
-    def wait
-      @guard.synchronize { @wait.wait(@guard) }
-    end
-  end
-  
   include Enumerable
   
   def initialize(size)
@@ -75,6 +43,34 @@ private
           end
         end
       end
+    end
+  end
+  
+  class SizedQueue
+    attr_reader :max
+    
+    def initialize(max)
+      @max    = max
+      @items  = Queue.new
+      @guard  = Mutex.new
+      @wait   = ConditionVariable.new
+    end
+    
+    # TODO make thread-safe
+    def push(obj)
+      wait until @items.size < @max
+      @items.push(obj)
+    end
+    
+    # TODO make thread-safe
+    def shift
+      obj = @items.shift
+      @guard.synchronize { @wait.signal }
+      obj
+    end
+    
+    def wait
+      @guard.synchronize { @wait.wait(@guard) }
     end
   end
 end

@@ -4,17 +4,17 @@ Class for managing fixed-size pools of worker threads.
 
 ## Usage example
 
-require 'worker_pool'
+    require 'worker_pool'
 
-pool = WorkerPool.new(3)    # Three workers
-pool << lambda { sleep 1 }
-pool << lambda { sleep 2 }
-pool << lambda { sleep 3 }
-pool << lambda { sleep 4 }  # Waits 3 seconds before starting
-pool.wait                   # Takes 7 seconds to finish
-
-# The three workers are now all available again:
-pool << lambda { sleep 2 }  # Starts immediately
+    pool = WorkerPool.new(3)    # Three workers
+    pool << lambda { sleep 1 }
+    pool << lambda { sleep 2 }
+    pool << lambda { sleep 3 }
+    pool << lambda { sleep 4 }  # Waits 3 seconds before starting
+    pool.wait                   # Takes 7 seconds to finish
+    
+    # The three workers are now all available again:
+    pool << lambda { sleep 2 }  # Starts immediately
 
 ## Credits
 

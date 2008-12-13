@@ -19,8 +19,7 @@ class WorkerPool
   alias << :push
   
   def wait
-    @workers.each { @queue.push(nil) }
-    sleep 0.01 until @workers.all? { |w| !w.alive? }
+    Finish.new(@workers, @queue).wait
     self
   end
   
@@ -56,6 +55,27 @@ private
     
     def wait
       @guard.synchronize { @wait.wait(@guard) }
+    end
+  end
+  
+  class Finish
+    def initialize(workers, queue)
+      @workers, @queue = workers, queue
+      @guard, @done = Mutex.new, ConditionVariable.new
+    end
+
+    def call
+      if @workers.select { |w| w.alive? }.size <= 1
+        @guard.synchronize { @done.signal }
+      else
+        @queue.push(self)
+      end
+      Thread.current.kill
+    end
+
+    def wait
+      @queue.push(self)
+      @guard.synchronize { @done.wait(@guard) } if @workers.any? { |w| w.alive? }
     end
   end
 end

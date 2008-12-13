@@ -20,20 +20,20 @@ class WorkerPoolTest < Test::Unit::TestCase
     5.times do
       tasks, result = [], []
       before = Time.now
-      @pool << lambda { sleep 0.01; result << 1 }
-      @pool << lambda { sleep 0.01; result << 2 }
-      @pool << lambda { sleep 0.01; result << 3 }
-      @pool << lambda { sleep 0.01; result << 4 }
+      @pool << lambda { sleep rand/50; result << 1 }
+      @pool << lambda { sleep rand/50; result << 2 }
+      @pool << lambda { sleep rand/50; result << 3 }
+      @pool << lambda { sleep rand/50; result << 4 }
       @pool.wait
       assert_equal [1, 2, 3, 4], result.sort
     end
   end
   
   def test_handle_with_exception
-    assert_equal 2, @pool.instance_eval("@queue").max # sanity check
+    assert_equal 2, @pool.instance_eval("@queue").max   # sanity check
     
     result = []
-    @pool << lambda { raise } << lambda { raise }  # kill all workers
+    @pool << lambda { raise } << lambda { raise }       # kill all workers
     @pool << lambda { result << true }
     @pool.wait
     assert_equal [true], result

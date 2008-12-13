@@ -4,8 +4,7 @@ class WorkerPool
   include Enumerable
   
   def initialize(size)
-    @queue = SizedQueue.new(size)
-    @workers = []
+    @workers, @queue = [], SizedQueue.new(size)
   end
   
   def each

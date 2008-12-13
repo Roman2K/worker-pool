@@ -14,14 +14,11 @@ class WorkerPoolTest < Test::Unit::TestCase
     assert_kind_of Thread, @pool.to_a[1]
     
     @pool.wait
-    
-    assert_equal [], @pool.to_a
   end
   
   def test_handle
     5.times do
-      setup
-      jobs, result = [], []
+      tasks, result = [], []
       before = Time.now
       @pool << lambda { sleep 0.01; result << 1 }
       @pool << lambda { sleep 0.01; result << 2 }
@@ -32,14 +29,14 @@ class WorkerPoolTest < Test::Unit::TestCase
     end
   end
   
-  class ErrorFromWorker < StandardError
-  end
-  
   def test_handle_with_exception
-    assert_raise ErrorFromWorker do
-      @pool.push(lambda { raise ErrorFromWorker })
-      @pool.finish
-    end
+    assert_equal 2, @pool.instance_eval("@queue").max # sanity check
+    
+    result = []
+    @pool << lambda { raise } << lambda { raise }  # kill all workers
+    @pool << lambda { result << true }
+    @pool.wait
+    assert_equal [true], result
   end
   
   def test_wait

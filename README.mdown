@@ -5,7 +5,7 @@ Class for managing fixed-size pools of worker threads.
 ## Usage example
 
     require 'worker_pool'
-
+    
     pool = WorkerPool.new(3)    # Three workers
     pool << lambda { sleep 1 }
     pool << lambda { sleep 2 }
@@ -15,6 +15,16 @@ Class for managing fixed-size pools of worker threads.
     
     # The three workers are now all available again:
     pool << lambda { sleep 2 }  # Starts immediately
+    
+    # Worker threads are spawned on the fly, so a task can safely kill its
+    # thread without preventing the next tasks from running:
+    pool = WorkerPool.new(1)
+    pool << lambda { puts 1 }
+    pool << lambda { raise "an error" }
+    pool << lambda { puts 2 }
+    pool.wait
+    > 1
+    > 2
 
 ## Credits
 

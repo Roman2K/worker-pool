@@ -5,45 +5,31 @@ class WorkerPool
   
   def initialize(size)
     @queue = SizedQueue.new(size)
-  end
-  
-  def workers
-    @workers || []
+    @workers = []
   end
   
   def each
-    @workers.each { |w| yield w } if @workers
+    @workers.each { |w| yield w }
   end
   
-  def push(*jobs)
+  def push(*tasks)
     ensure_workers
-    jobs.each { |job| @queue.push(job) }
+    tasks.each { |task| @queue.push(task) }
     self
   end
   alias << :push
   
   def wait
-    return unless @workers
-    @workers.size.times { push(nil) }
+    @workers.each { @queue.push(nil) }
     sleep 0.01 until @workers.all? { |w| !w.alive? }
-    @workers = nil
-    nil
+    self
   end
   
 private
 
   def ensure_workers
-    @workers ||= Array.new(@queue.max) do
-      Thread.new do
-        while job = @queue.shift
-          begin
-            job.call
-          rescue Exception
-            Thread.main.raise $!
-          end
-        end
-      end
-    end
+    @workers.delete_if { |w| !w.alive? }
+    @workers << Thread.new { while task = @queue.shift do task.call end } unless @workers.size >= @queue.max
   end
   
   class SizedQueue

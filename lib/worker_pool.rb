@@ -7,6 +7,9 @@ class WorkerPool
     @workers, @queue = [], SizedQueue.new(size)
   end
   
+  def size()      @queue.max        end
+  def size=(size) @queue.max = size end
+  
   def each
     @workers.each { |w| yield w }
   end

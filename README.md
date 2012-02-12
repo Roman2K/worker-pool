@@ -32,6 +32,3 @@ The `WorkerPool` class allows for doing that very easily: fetch jobs from the da
     > 1
     > 2
 
-## Credits
-
-Written by [Roman Le Négrate](http://roman.flucti.com) ([contact](mailto:roman.lenegrate@gmail.com)). Released under the MIT license: see the `LICENSE` file.
